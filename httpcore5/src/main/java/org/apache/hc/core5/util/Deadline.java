@@ -28,10 +28,12 @@
 package org.apache.hc.core5.util;
 
 import java.text.ParseException;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -127,8 +129,21 @@ public class Deadline {
         if (source == null) {
             return null;
         }
-        final Instant instant = Instant.from(DATE_TIME_FORMATTER.parse(source));
-        return fromUnixMilliseconds(instant.toEpochMilli());
+        try {
+            final Instant instant = Instant.from(DATE_TIME_FORMATTER.parse(source));
+            return fromUnixMilliseconds(instant.toEpochMilli());
+        } catch (final DateTimeParseException ex) {
+            throw parseException(ex.getMessage(), ex.getErrorIndex(), ex);
+        } catch (final DateTimeException | ArithmeticException ex) {
+            // a year that is beyond the range of a deadline
+            throw parseException(ex.getMessage(), 0, ex);
+        }
+    }
+
+    private static ParseException parseException(final String message, final int errorOffset, final Throwable cause) {
+        final ParseException ex = new ParseException(message, errorOffset);
+        ex.initCause(cause);
+        return ex;
     }
 
     private volatile boolean frozen;

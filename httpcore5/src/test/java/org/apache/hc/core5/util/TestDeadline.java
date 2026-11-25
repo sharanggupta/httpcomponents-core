@@ -116,6 +116,21 @@ class TestDeadline {
     }
 
     @Test
+    void testParseInvalid() {
+        Assertions.assertThatThrownBy(() -> Deadline.parse("garbage"))
+                .isInstanceOf(ParseException.class)
+                .hasMessageContaining("garbage");
+        Assertions.assertThatThrownBy(() -> Deadline.parse("2026-13-45T00:00:00.000+0000"))
+                .isInstanceOf(ParseException.class);
+        Assertions.assertThatThrownBy(() -> Deadline.parse("1969-12-31T17:00:01.000"))
+                .isInstanceOfSatisfying(ParseException.class,
+                        ex -> Assertions.assertThat(ex.getErrorOffset()).isEqualTo(23));
+        // a year the pattern accepts, but whose milliseconds do not fit in a long
+        Assertions.assertThatThrownBy(() -> Deadline.parse("+300000000-01-01T00:00:00.000+0000"))
+                .isInstanceOf(ParseException.class);
+    }
+
+    @Test
     void testRemaining() {
         final int oneHourInMillis = 60_000 * 60;
         final long nowPlusOneHour = System.currentTimeMillis() + oneHourInMillis;
