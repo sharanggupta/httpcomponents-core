@@ -82,6 +82,10 @@ class TestInetAddressUtils {
         Assertions.assertThat(InetAddressUtils.isIPv6("fe80::1ff:fe23:4567:890a")).isTrue();
         Assertions.assertThat(InetAddressUtils.isIPv6("fe80::1ff:fe23:4567:890a%eth2")).isTrue();
         Assertions.assertThat(InetAddressUtils.isIPv6("fe80::1ff:fe23:4567:890a%3")).isTrue();
+        // unreserved characters other than "-" (RFC 6874), as in VLAN interface names
+        Assertions.assertThat(InetAddressUtils.isIPv6("fe80::1ff:fe23:4567:890a%eth0.100")).isTrue();
+        Assertions.assertThat(InetAddressUtils.isIPv6("fe80::1ff:fe23:4567:890a%wlan_0")).isTrue();
+        Assertions.assertThat(InetAddressUtils.isIPv6("fe80::1ff:fe23:4567:890a%en~1")).isTrue();
     }
 
     @Test
@@ -238,6 +242,16 @@ class TestInetAddressUtils {
     void httpHost_toURI_formatsZoneId() {
         final HttpHost h = new HttpHost("http", "fe80::1%eth0", 8080);
         Assertions.assertThat(h.toURI()).isEqualTo("http://[fe80::1%25eth0]:8080");
+    }
+
+    @Test
+    void uriBuilder_roundTrip_zoneId_with_dot_and_underscore() throws Exception {
+        final URIBuilder b = new URIBuilder(new URI("http://[fe80::1%25eth0.100]:8080/path"));
+        Assertions.assertThat(b.getHost()).isEqualTo("fe80::1%eth0.100");
+        Assertions.assertThat(b.build().toASCIIString()).isEqualTo("http://[fe80::1%25eth0.100]:8080/path");
+        Assertions.assertThat(b.setPort(80).build().toASCIIString()).isEqualTo("http://[fe80::1%25eth0.100]:80/path");
+        Assertions.assertThat(new URIBuilder(new URI("http://[fe80::1%25wlan_0]/")).setPort(80).build().toASCIIString())
+                .isEqualTo("http://[fe80::1%25wlan_0]:80/");
     }
 
     @Test

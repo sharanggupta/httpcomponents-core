@@ -85,9 +85,10 @@ public class InetAddressUtils {
 
     /**
      * Regular expression pattern to match the scope ID in an IPv6 scoped address.
-     * The scope ID should be a non-empty string consisting of only alphanumeric characters or "-".
+     * The scope ID should be a non-empty string of unreserved characters (RFC 6874): alphanumeric
+     * characters, "-", ".", "_" or "~", as in the interface name {@code eth0.100}.
      */
-    private static final Pattern SCOPE_ID_PATTERN = Pattern.compile("^[a-zA-Z0-9\\-]+$");
+    private static final Pattern SCOPE_ID_PATTERN = Pattern.compile("^[a-zA-Z0-9\\-._~]+$");
 
     /**
      * Delimiter used to separate an IPv6 address from its scope ID.
