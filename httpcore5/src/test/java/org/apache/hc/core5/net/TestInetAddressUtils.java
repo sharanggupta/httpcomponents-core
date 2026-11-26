@@ -288,4 +288,13 @@ class TestInetAddressUtils {
         Assertions.assertThat(ZoneIdSupport.looksLikeIPv6AddressPart("not-an-ip")).isFalse();
     }
 
+    @Test
+    void bracketed_literal_is_not_an_address_part() {
+        Assertions.assertThat(ZoneIdSupport.looksLikeIPv6AddressPart("[::1]")).isFalse();
+        Assertions.assertThat(ZoneIdSupport.looksLikeIPv6AddressPart("[fe80::1%25eth0]")).isFalse();
+        final StringBuilder buf = new StringBuilder();
+        Assertions.assertThat(ZoneIdSupport.appendBracketedIPv6(buf, "[::1]")).isFalse();
+        Assertions.assertThat(buf.toString()).isEmpty();
+    }
+
 }

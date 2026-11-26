@@ -201,4 +201,12 @@ class TestURIAuthority {
         Assertions.assertThat(new URIAuthority("::1", -1).toString()).isEqualTo("[::1]");
         Assertions.assertThat(new URIAuthority("user", "::1", -1).toString()).isEqualTo("user@[::1]");
     }
+
+    @Test
+    void testBracketedIpv6HostToString() {
+        Assertions.assertThat(new URIAuthority("[::1]", 80).toString()).isEqualTo("[::1]:80");
+        Assertions.assertThat(new URIAuthority("user", "[::1]", 80).toString()).isEqualTo("user@[::1]:80");
+        Assertions.assertThat(new URIAuthority("[::1]", -1).toString()).isEqualTo("[::1]");
+        Assertions.assertThat(new URIAuthority("[fe80::1%25eth0]", 80).toString()).isEqualTo("[fe80::1%25eth0]:80");
+    }
 }

@@ -136,13 +136,18 @@ public final class ZoneIdSupport {
      * (i.e., before any ZoneID) by counting colons. We do not parse/validate IPv6;
      * this keeps our surface minimal while still bracketing correctly.
      * <p>Rule: if the address-part (up to '%', if present) contains &gt;= 2 colons,
-     * treat it as IPv6-like.</p>
+     * treat it as IPv6-like. A host that is already in brackets, as returned by
+     * {@link java.net.URI#getHost()}, is a complete literal and not an address-part.</p>
      */
     public static boolean looksLikeIPv6AddressPart(final CharSequence host) {
         if (host == null) {
             return false;
         }
-        int end = host.length();
+        final int len = host.length();
+        if (len > 1 && host.charAt(0) == '[' && host.charAt(len - 1) == ']') {
+            return false;
+        }
+        int end = len;
         for (int i = 0; i < end; i++) {
             if (host.charAt(i) == '%') {
                 end = i;

@@ -206,6 +206,16 @@ class TestHttpHost {
     }
 
     @Test
+    void testCreateFromURIWithIpv6Literal() {
+        final HttpHost host = HttpHost.create(URI.create("http://[::1]:8080/foo"));
+        Assertions.assertThat(host.toURI()).isEqualTo("http://[::1]:8080");
+        Assertions.assertThat(host.toString()).isEqualTo("http://[::1]:8080");
+        Assertions.assertThat(host.toHostString()).isEqualTo("[::1]:8080");
+        Assertions.assertThat(HttpHost.create(URI.create("http://[fe80::1%25eth0]:8080/foo")).toURI())
+                .isEqualTo("http://[fe80::1%25eth0]:8080");
+    }
+
+    @Test
     void testCreateFromStringInvalid() {
         Assertions.assertThatThrownBy(() ->
                         HttpHost.create(" host "))

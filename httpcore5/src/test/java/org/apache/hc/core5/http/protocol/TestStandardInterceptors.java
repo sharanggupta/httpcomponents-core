@@ -27,6 +27,7 @@
 
 package org.apache.hc.core5.http.protocol;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 import javax.net.ssl.SSLSession;
@@ -376,6 +377,17 @@ class TestStandardInterceptors {
         final Header header = request.getFirstHeader(HttpHeaders.HOST);
         Assertions.assertThat(header).isNotNull();
         Assertions.assertThat(header.getValue()).isEqualTo("somehost:8080");
+    }
+
+    @Test
+    void testRequestTargetHostGeneratedFromIpv6LiteralUri() throws Exception {
+        final HttpCoreContext context = HttpCoreContext.create();
+        final BasicClassicHttpRequest request = new BasicClassicHttpRequest(Method.GET, URI.create("http://[::1]:8080/"));
+        final HttpRequestInterceptor interceptor = RequestTargetHost.INSTANCE;
+        interceptor.process(request, request.getEntity(), context);
+        final Header header = request.getFirstHeader(HttpHeaders.HOST);
+        Assertions.assertThat(header).isNotNull();
+        Assertions.assertThat(header.getValue()).isEqualTo("[::1]:8080");
     }
 
     @Test
