@@ -287,6 +287,16 @@ class TestBasicMessageBuilders {
     }
 
     @Test
+    void testRequestUriWithIpv6Authority() {
+        final BasicRequestBuilder builder = BasicRequestBuilder.get()
+                .setScheme("http")
+                .setAuthority(new URIAuthority("::1", 8080))
+                .setPath("/stuff");
+        Assertions.assertThat(builder.getUri()).isEqualTo(URI.create("http://[::1]:8080/stuff"));
+        Assertions.assertThat(builder.getUri().getHost()).isEqualTo("[::1]");
+    }
+
+    @Test
     void testIDNIntegration() {
         final String url = "http://müller.example.com:8080/path";
         final HttpRequest request = new BasicHttpRequest(Method.GET, URI.create(url));

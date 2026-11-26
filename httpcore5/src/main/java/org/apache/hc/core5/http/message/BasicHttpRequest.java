@@ -290,10 +290,8 @@ public class BasicHttpRequest extends HeaderGroup implements HttpRequest {
     private void assembleRequestUri(final StringBuilder buf) {
         if (this.authority != null) {
             buf.append(this.scheme != null ? this.scheme : URIScheme.HTTP.id).append("://");
-            buf.append(this.authority.getHostName());
-            if (this.authority.getPort() >= 0) {
-                buf.append(":").append(this.authority.getPort());
-            }
+            // host and port only; an IPv6 address needs its brackets
+            buf.append(new URIAuthority(this.authority.getHostName(), this.authority.getPort()));
         }
         if (this.path == null) {
             buf.append("/");

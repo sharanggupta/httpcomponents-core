@@ -186,6 +186,25 @@ class TestBasicMessages {
     }
 
     @Test
+    void testRequestWithIpv6Authority() throws Exception {
+        final BasicHttpRequest request = new BasicHttpRequest(Method.GET, new HttpHost("http", "::1", 8080), "/stuff");
+        Assertions.assertThat(request.getAuthority()).isEqualTo(new URIAuthority("::1", 8080));
+        Assertions.assertThat(request.getUri()).isEqualTo(new URI("http://[::1]:8080/stuff"));
+        Assertions.assertThat(request.getUri().getHost()).isEqualTo("[::1]");
+        Assertions.assertThat(request.getUri().getPort()).isEqualTo(8080);
+        request.setAbsoluteRequestUri(true);
+        Assertions.assertThat(request.getRequestUri()).isEqualTo("http://[::1]:8080/stuff");
+    }
+
+    @Test
+    void testRequestWithIpv6LiteralUri() throws Exception {
+        final HttpRequest request = new BasicHttpRequest(Method.GET, URI.create("http://[::1]:8080/stuff"));
+        Assertions.assertThat(request.getUri()).isEqualTo(new URI("http://[::1]:8080/stuff"));
+        final HttpRequest noPort = new BasicHttpRequest(Method.GET, new HttpHost("http", "::1", -1), "/stuff");
+        Assertions.assertThat(noPort.getUri()).isEqualTo(new URI("http://[::1]/stuff"));
+    }
+
+    @Test
     void testRequestWithAuthorityRelativePath() throws Exception {
         final HttpRequest request = new BasicHttpRequest(Method.GET, new HttpHost("http", "somehost", -1), "stuff");
         Assertions.assertThat(request.getMethod()).isEqualTo(Method.GET.name());
